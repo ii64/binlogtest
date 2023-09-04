@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  db:
+    image: mariadb:latest
+    command:
+      - --log-bin
+      # https://dev.mysql.com/doc/refman/8.0/en/binary-log-setting.html
+      - --binlog-format=ROW
+    environment:
+      - MARIADB_ROOT_PASSWORD=admin123
+    expose:
+      - 3306
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - /tmp/binlogtest_db:/var/lib/mysql
+  
+  db_initial:
+    image: mariadb:latest
+    entrypoint:
+      - sh 
+      - -c
+      - |
+        mariadb -u root -padmn123 < /migrate/schema_initial_data.sql
+    depends_on:
+      - db
+    volumes:
+      - ../migrate:/migrate
